@@ -14,16 +14,9 @@ let users = {
   user: { username: 'user', password: 'password', role: 'user' },
 };
 
-let foodObj = {
-  name: 'food',
-  calories: 100,
-  type: 'FRUIT'
-};
-
-let clothesObj = {
-  name: 'clothes',
-  color: 'color',
-  size: 'size'
+let objModel = {
+  food: {name: 'food', calories: 100, type: 'FRUIT'},
+  clothes: {name: 'clothes', color: 'color', size: 'size'}
 }
 
 describe('API Router', () => {
@@ -42,7 +35,7 @@ describe('API Router', () => {
       const bearerResponse = await mockRequest
         .post('/api/v2/food')
         .set('Authorization', `Bearer ${token}`)
-        .send(foodObj);
+        .send(objModel.food);
 
       // check that food object was created
       expect(bearerResponse.status).toBe(201);
@@ -65,7 +58,7 @@ describe('API Router', () => {
       const bearerResponse = await mockRequest
         .post('/api/v2/clothes')
         .set('Authorization', `Bearer ${token}`)
-        .send(clothesObj);
+        .send(objModel.clothes);
 
       // check that food object was created
       expect(bearerResponse.status).toBe(201);
@@ -78,5 +71,42 @@ describe('API Router', () => {
     })
 
   });
+
+});
+
+describe('V1 Routes', () => {
+
+  Object.keys(objModel).forEach(objType => {
+
+    it(`creates a ${objType} object`, async () => {
+      
+      // First, use basic to login to get a token
+      await mockRequest.post('/signup').send(users.admin);
+      const response = await mockRequest.post('/signin')
+        .auth(users.admin.username, users.admin.password);
+      const token = response.body.token;
+
+      // then, create new object with auth
+      const apiResponse = await mockRequest
+        .post(`/api/v1/${objType}`)
+        .send(objModel[objType]);
+
+      // check that the object was created
+      expect(apiResponse.status).toBe(201);
+      expect(apiResponse.body.name).toBe(`${objType}`);
+
+      // check update functionality
+      const updateResponse = await mockRequest
+        .put(`/api/v1/${objType}/${apiResponse.body._id}`)
+        .send(objModel[objType]);
+      expect(updateResponse.status).toBe(200);
+
+      // check delete functionality
+      const deleteResponse = await mockRequest
+        .delete(`/api/v2/${objType}/${apiResponse.body._id}`)
+        .set('Authorization', `Bearer ${token}`)
+      expect(deleteResponse.status).toBe(200);
+    });
+  })
 
 });
