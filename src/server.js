@@ -10,6 +10,7 @@ const errorHandler = require('./error-handlers/500.js');
 const notFound = require('./error-handlers/404.js');
 const authRoutes = require('./auth/routes.js');
 const v1Routes = require('../src/routes/v1.js');
+const v2Routes = require('../src/routes/v2.js');
 
 // Prepare the express app
 const app = express();
@@ -22,7 +23,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Routes
-app.use('/api/v1', v1Routes)
+app.use('/api/v1', v1Routes);
+app.use('/api/v2', v2Routes);
 app.use(authRoutes);
 
 // Catchalls
