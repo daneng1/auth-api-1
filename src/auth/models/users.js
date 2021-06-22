@@ -7,7 +7,7 @@ const jwt = require('jsonwebtoken');
 const users = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  role: { type: String, required: true, default: 'user', enum: ['user', 'writer', 'editor', 'admin'] },
+  role: { type: String, required: true, default: 'rider', enum: ['rider', 'driver', 'admin', 'admin'] },
 });
 // }, { toObject: { getters: true } }); // What would this do if we use this instead of just });
 
@@ -22,9 +22,8 @@ users.virtual('token').get(function () {
 
 users.virtual('capabilities').get(function () {
   let acl = {
-    user: ['read'],
-    writer: ['read', 'create'],
-    editor: ['read', 'create', 'update'],
+    rider: ['read', 'create', 'update'],
+    driver: ['read', 'create', 'update'],
     admin: ['read', 'create', 'update', 'delete']
   };
   return acl[this.role];
